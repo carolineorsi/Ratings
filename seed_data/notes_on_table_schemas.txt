@@ -1,0 +1,21 @@
+user table:
+user_id  primary key
+?email 
+?password
+age  integer
+gender
+zipcode
+
+item movie info table:
+movie id primary key
+movie name varchar
+release date
+IMDB url
+
+ratings
+rating id primarykey
+movie_id int
+user_id int
+rating int?
+
+
