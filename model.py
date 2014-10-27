@@ -1,12 +1,18 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, Date
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, Date, and_, or_
+from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import scoped_session
+from sqlalchemy import ForeignKey
 
-ENGINE = None
-Session = None
+
+#magical shit that makes each session thread-safe
+engine = create_engine("sqlite:///ratings.db", echo=False)
+session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
 
 Base = declarative_base()
+Base.query = session.query_property()
+
 
 ### Class declarations go here
 class User(Base):
@@ -18,6 +24,7 @@ class User(Base):
     age = Column(Integer, nullable = True)
     zipcode = Column(String(15), nullable = True)
     gender = Column(String(20), nullable = True)
+
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -31,28 +38,35 @@ class Rating(Base):
     __tablename__ = "ratings"
 
     id = Column(Integer, primary_key = True)
-    movie_id = Column(Integer, nullable = False)
-    user_id  = Column(Integer, nullable = False)
+    movie_id = Column(Integer, ForeignKey('movies.id'))
+    user_id  = Column(Integer, ForeignKey('users.id'))
     rating = Column(Integer, nullable = False)
 
-
+    user = relationship("User", backref=backref("ratings", order_by=id))
+    movie = relationship("Movie", backref=backref("ratings", order_by=id))
 
 
 ### End class declarations
+
 
 def connect():
     global ENGINE
     global Session
 
-    ENGINE = create_engine("sqlite:///ratings.db", echo=True)
+    ENGINE = create_engine("sqlite:///ratings.db", echo=False)
     Session = sessionmaker(bind=ENGINE)
-
     return Session()
 
 
 def main():
-    """In case we need this for something"""
     pass
+#    """In case we need this for something"""
+#    session = connect()
+    # results = session.query(Movie).filter(or_(Movie.movie_name.like('J%'),Movie.movie_name.like('Q%'))).all()
+    # for result in results:
+    #     print result.movie_name, result.release_date
+
+    
 
 if __name__ == "__main__":
     main()

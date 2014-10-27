@@ -1,0 +1,11 @@
+session = connect()
+r = session.query(Rating).get(1)
+u = r.user
+m = r.movie
+for i in range(len(m.ratings)):
+    vars(m.ratings[i])
+
+m is a movie that is reviewed by different users
+
+for i in range(len(m.user)):
+    vars(m.user[i])

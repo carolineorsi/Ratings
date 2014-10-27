@@ -30,13 +30,14 @@ def load_movies(session):
          try:
              aMovie.release_date = datetime.datetime.strptime(row[2], "%d-%b-%Y")
          except:
+            print "HERE", row
+            raw_input()
             aMovie.release_date = None 
          aMovie.url = row[4]
          all_movies.append(aMovie)
          session.add(all_movies[i])
          i += 1
 
-    # use u.item
 
 def load_ratings(session):
     f = open("seed_data/u.data", "r")
@@ -55,13 +56,15 @@ def load_ratings(session):
 
 def main(session):
     # You'll call each of the load_* functions with the session as an argument
-    load_users(session)
-    load_movies(session)
-    load_ratings(session)
+    # load_users(session)
+     load_movies(session)
+    # load_ratings(session)
     # print vars(session.query(model.Movie).get(1))
     # print vars(session.query(model.User).get(1))
     # print vars(session.query(model.Rating).get(1))
-    session.commit()
+    # session.commit()
+    #pass
+
 if __name__ == "__main__":
     s= model.connect()
     main(s)
