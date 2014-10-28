@@ -6,7 +6,7 @@
     <body>
         <h2>User {{ user.id }} Ratings </h2>
         {% for rating in ratings %}
-        <h4><em>{{ rating.movie.movie_name }}</em> - {{ rating.rating }}</h4>
+        <h4><em><a href="/view/{{ rating.movie.id }}">{{ rating.movie.movie_name }}</a></em> - {{ rating.rating }}</h4>
         {% endfor %}
     </body>
 </html>

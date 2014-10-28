@@ -44,7 +44,7 @@ def process_login():
         flask_session['age'] = user.age
         flask_session['zipcode'] = user.zipcode
         flask_session['gender'] = user.gender
-        return render_template("account.html", email=flask_session['email'])
+        return render_template("account.html", email=flask_session['email'], user_id=flask_session['id']) 
 
 @app.route("/list_users")
 def list_users():
@@ -78,10 +78,28 @@ def view_rating(movie_id):
 
     return render_template("movie_detail.html", movie=movie_info, rating=your_rating)
 
-@app.route("/later")
-def later():
-    user_list = model.session.query(model.User).limit(5).all()
-    return render_template("user_list.html", users=user_list)
+@app.route("/update/<int:movie_id>", methods=['POST'])
+def update_rating(movie_id):
+    flag = False
+    rating = request.form.get('newRating')
+    this_user = model.session.query(model.User).get(flask_session['id'])
+    for i in range(len(this_user.ratings)):
+        if this_user.ratings[i].movie_id == movie_id:
+            this_user.ratings[i].rating = rating
+            model.session.add(this_user)
+            model.session.commit()
+            flag = True
+            return str(this_user.ratings[i].rating)            
+
+    if flag == False:
+        newRating = model.Rating()
+        newRating.movie_id = movie_id
+        newRating.user_id = this_user.id
+        newRating.rating = rating
+        model.session.add(newRating)
+        model.session.commit()
+        return str(newRating.rating)
+
 
 if __name__ == "__main__":
     app.run(debug = True)
