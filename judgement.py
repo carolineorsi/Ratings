@@ -43,9 +43,18 @@ def process_login():
         flask_session['age'] = user.age
         flask_session['zipcode'] = user.zipcode
         flask_session['gender'] = user.gender
-        return render_template("test.html", femail=flask_session['email'], semail=user.email)
+        return render_template("account.html", email=flask_session['email'])
 
+@app.route("/list_users")
+def list_users():
+    user_list = model.session.query(model.User).limit(5).all()
+    return render_template("list.html", users=user_list)
 
+@app.route("/list_ratings/<int:user_id>")
+def list_ratings(user_id):
+    user = model.session.query(model.User).get(user_id)
+    ratings_list = user.ratings
+    return render_template("ratings.html", user=user, ratings=ratings_list) 
 
 @app.route("/later")
 def later():
