@@ -39,6 +39,7 @@ def process_login():
         flash("Wrong password.")
         return redirect(url_for("process_login"))
     else:
+        flask_session['id'] = user.id
         flask_session['email'] = user.email
         flask_session['age'] = user.age
         flask_session['zipcode'] = user.zipcode
@@ -55,6 +56,27 @@ def list_ratings(user_id):
     user = model.session.query(model.User).get(user_id)
     ratings_list = user.ratings
     return render_template("ratings.html", user=user, ratings=ratings_list) 
+
+@app.route("/all_movies")
+def list_movies():
+    all_movies = model.session.query(model.Movie).all()
+    movie_title = []
+    movie_url = []
+    for i in range(len(all_movies)):
+        movie_title.append(all_movies[i].movie_name)
+        movie_url.append(all_movies[i].url)
+    return render_template("all_movies.html", all_movies = all_movies)
+
+@app.route("/view/<int:movie_id>")
+def view_rating(movie_id):
+    movie_info = model.session.query(model.Movie).get(movie_id)
+    your_rating = None
+    for rating in movie_info.ratings:
+        if rating.user_id == flask_session['id']:
+            your_rating = rating
+            break
+
+    return render_template("movie_detail.html", movie=movie_info, rating=your_rating)
 
 @app.route("/later")
 def later():

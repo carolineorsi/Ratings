@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/static/css/style.css" />
+    </head>
+    <body>
+        <h2>User {{ user.id }} Ratings </h2>
+        {% for rating in ratings %}
+        <h4><em>{{ rating.movie.movie_name }}</em> - {{ rating.rating }}</h4>
+        {% endfor %}
+    </body>
+</html>

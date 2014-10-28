@@ -1,0 +1,11 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/static/css/style.css" />
+    </head>
+    <body>
+        {% for user in users %}
+        <h3><a href="/list_ratings/{{ user.id }}">User {{ user.id }}</a>, age {{ user.age }} has {{ user.ratings|length }} ratings</h3>
+        {% endfor %}
+    </body>
+</html>
