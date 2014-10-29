@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+{% block body %}
+
 <html>
     <head>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
@@ -15,6 +18,12 @@
     </head>
     <body>
         <h2>{{ movie.movie_name }}</h2>
+        <h2>Average User Rating: 
+
+            {{ avg_score }}
+
+        </h2>
+        {% if 'id' in session %}
         <div id = "user_rating">
         {% if rating %}
             Your rating: {{ rating.rating }}
@@ -30,6 +39,7 @@
                 <button id="movieUpdateButton" type="submit" class="btn btn-default">Submit Rating</button>
             </form>
         </div>
+        {% endif %}
     </body>
 
 <script src="/static/js/jquery-1.11.0.min.js"></script>
@@ -50,11 +60,15 @@
             var textInput = $("#rating");
             var newRating = textInput.val();
 
-            postRequestToUpdate(newRating);
+            if ((newRating <= 5 ) && (newRating >= 1) ){
+                postRequestToUpdate(newRating);
+            }
+            else{
+                alert("Invalid entry.")
+            }
         }
 
         function postRequestToUpdate(newRating) {
-            alert(newRating);
             
             $.post(
                 "/update/{{ movie.id }}", 
@@ -72,3 +86,4 @@
 
 
 </html>
+{% endblock %}

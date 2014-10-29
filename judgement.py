@@ -44,7 +44,16 @@ def process_login():
         flask_session['age'] = user.age
         flask_session['zipcode'] = user.zipcode
         flask_session['gender'] = user.gender
-        return render_template("account.html", email=flask_session['email'], user_id=flask_session['id']) 
+        #        movie_title.append(all_movies[i].movie_name)
+        # return render_template("account.html", email=flask_session['email'], user_id=flask_session['id'])
+        return redirect(url_for("account_page"))
+
+@app.route("/account")
+def account_page():
+    if 'email' in flask_session:
+        return render_template("account.html", email=flask_session['email'], user_id=flask_session['id'])
+    else:
+        return render_template("account.html")
 
 @app.route("/list_users")
 def list_users():
@@ -65,24 +74,41 @@ def list_movies():
     for i in range(len(all_movies)):
         movie_title.append(all_movies[i].movie_name)
         movie_url.append(all_movies[i].url)
+
+
     return render_template("all_movies.html", all_movies = all_movies)
 
 @app.route("/view/<int:movie_id>")
 def view_rating(movie_id):
     movie_info = model.session.query(model.Movie).get(movie_id)
     your_rating = None
+    avg_score = average_score(movie_info)
     for rating in movie_info.ratings:
-        if rating.user_id == flask_session['id']:
-            your_rating = rating
-            break
+        if 'id' in flask_session:
+            if rating.user_id == flask_session['id']:
+                your_rating = rating
+                break
 
-    return render_template("movie_detail.html", movie=movie_info, rating=your_rating)
+    return render_template("movie_detail.html", movie=movie_info, rating=your_rating, avg_score = avg_score)
+
+def average_score(movie_info):
+    avg_score = 0
+    for i in range(len(movie_info.ratings)):
+        avg_score += movie_info.ratings[i].rating
+    avg_score = float(avg_score)/float(i)
+    return avg_score
 
 @app.route("/update/<int:movie_id>", methods=['POST'])
 def update_rating(movie_id):
     flag = False
     rating = request.form.get('newRating')
     this_user = model.session.query(model.User).get(flask_session['id'])
+    movie = model.session.query(model.Movie).get(movie_id)
+
+    # Update average score in movie detail page by passing average back to
+    # javascript. Needs to be converted to JSON.
+    # avg_score = average_score(movie)
+
     for i in range(len(this_user.ratings)):
         if this_user.ratings[i].movie_id == movie_id:
             this_user.ratings[i].rating = rating
@@ -99,6 +125,12 @@ def update_rating(movie_id):
         model.session.add(newRating)
         model.session.commit()
         return str(newRating.rating)
+
+@app.route("/logout")
+def log_out():
+    flask_session.clear()    
+    return redirect(url_for("show_login"))
+
 
 
 if __name__ == "__main__":
