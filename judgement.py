@@ -31,6 +31,9 @@ def show_login():
 def process_login():
     email = request.form.get("email")
     password = request.form.get("password")
+    if email == "":
+        flash("Invalid email address.")
+        return redirect(url_for("process_login"))
     user = model.session.query(model.User).filter_by(email = email).first()
     if user == None:
         flash("User does not exist")
