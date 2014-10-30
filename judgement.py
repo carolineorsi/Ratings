@@ -92,7 +92,36 @@ def view_rating(movie_id):
                 your_rating = rating
                 break
 
-    return render_template("movie_detail.html", movie=movie_info, rating=your_rating, avg_score = avg_score)
+    user = model.session.query(model.User).get(flask_session['id'])
+    prediction = None
+    if not your_rating:
+        prediction = user.predict_rating(movie_info)
+        effective_rating = prediction
+    else:
+        effective_rating = your_rating.rating
+
+    the_eye = model.session.query(model.User).filter_by(email="theeye@ofjudgement.com").first()
+    eye_rating = model.session.query(model.Rating).filter_by(user_id=the_eye.id, movie_id=movie_info.id).first()
+
+    if not eye_rating:
+        eye_rating = the_eye.predict_rating(movie_info)
+    else:
+        eye_rating = eye_rating.rating
+
+    difference = abs(eye_rating - effective_rating)
+
+    messages = ["I suppose you don't have such bad taste after all.",
+             "I regret every decision that I've ever made that has brought me to listen to your opinion.",
+             "Words fail me, as your taste in movies has clearly failed you.",
+             "That movie is great. For a clown to watch. Idiot."]
+
+    beratement = messages[int(difference)-1]
+
+    return render_template("movie_detail.html", 
+                            movie=movie_info, 
+                            rating=your_rating, 
+                            avg_score = avg_score, 
+                            prediction=prediction, beratement=beratement)
 
 def average_score(movie_info):
     avg_score = 0

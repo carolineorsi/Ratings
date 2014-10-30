@@ -22,15 +22,17 @@
 
             {{ avg_score }}
 
-        </h2>
+        
         {% if 'id' in session %}
         <div id = "user_rating">
         {% if rating %}
             Your rating: {{ rating.rating }}
         {% else %}
-                You have not rated this movie yet.
+            Your predicted rating: {{ prediction }}
         {% endif %}
+        <div>{{ beratement }}</div>
         </div>
+        </h2>
         <div> <button type="button" class="btn btn-default" id="updateButton">Update Rating</button></div> 
 
         <div class='hidden' id="updateBox">
