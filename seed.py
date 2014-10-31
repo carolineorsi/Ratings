@@ -6,8 +6,7 @@ def load_users(session):
     f = open("seed_data/u.user", "r")
     reader = csv.reader(f, delimiter="|")
     all_users = []
-    i = 0
-    for row in reader:
+    for i, row in enumerate(reader):
         aUser = model.User()
         aUser.id = row[0]
         aUser.age = row[1]
@@ -15,7 +14,6 @@ def load_users(session):
         aUser.zipcode = row[4]
         all_users.append(aUser)
         session.add(all_users[i])
-        i += 1
 
 def load_movies(session):
     f = open("seed_data/u.item", "r")
@@ -25,7 +23,7 @@ def load_movies(session):
     for row in reader:
          aMovie = model.Movie()
          aMovie.id = row[0]
-         aMovie.movie_name = row[1][0:-7]
+         aMovie.movie_name = row[1][0:-7]  # DEFINITELY DOCUMENT THIS OR MAKE IT SAFE
          aMovie.movie_name = aMovie.movie_name.decode("latin-1")
          try:
              aMovie.release_date = datetime.datetime.strptime(row[2], "%d-%b-%Y")

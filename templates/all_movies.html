@@ -9,7 +9,7 @@
     <body>
         <h2>Movies!! </h2>
         {% for movie in all_movies %}
-          <div>  <a href="/view/{{movie.id}}">  {{ movie.movie_name }} </a> <a href={{movie.url}}>  <button type="button" class="btn btn-default">IMDB</button></a></div>
+          <div>  <a href="/view/{{movie.id}}">  {{ movie.movie_name }} </a> <a href="{{movie.url}}">  <button type="button" class="btn btn-default">IMDB</button></a></div>
         {% endfor %}
     </body>
 </html>

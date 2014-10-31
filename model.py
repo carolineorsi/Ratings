@@ -19,12 +19,12 @@ Base.query = session.query_property()
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key = True)
-    email = Column(String(64), nullable = True)
-    password = Column(String(64), nullable = True)
-    age = Column(Integer, nullable = True)
-    zipcode = Column(String(15), nullable = True)
-    gender = Column(String(20), nullable = True)
+    id = Column(Integer, primary_key=True)
+    email = Column(String(64), nullable=True)
+    password = Column(String(64), nullable=True)
+    age = Column(Integer, nullable=True)
+    zipcode = Column(String(15), nullable=True)
+    gender = Column(String(20), nullable=True)
 
 
     def similarity(self, other):
@@ -80,7 +80,7 @@ class User(Base):
         numerator = sum([other_rating.rating * similarity for similarity, other_rating in similarities])
         denominator = sum([similarity[0] for similarity in similarities])
         
-        return numerator/denominator
+        return numerator/float(denominator)
 
 
 

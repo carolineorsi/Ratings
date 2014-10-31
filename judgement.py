@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for, flash
 from flask import session as flask_session
+from sqlalchemy import and_
 import jinja2
 import model
 
@@ -35,7 +36,8 @@ def process_login():
         flash("Invalid email address.")
         return redirect(url_for("process_login"))
     user = model.session.query(model.User).filter_by(email = email).first()
-    if user == None:
+
+    if user is None:
         flash("User does not exist")
         return redirect(url_for("process_login"))
     elif password != user.password:
@@ -65,6 +67,7 @@ def list_users():
 
 @app.route("/list_ratings/<int:user_id>")
 def list_ratings(user_id):
+    # FIXME: make that a join query
     user = model.session.query(model.User).get(user_id)
     ratings_list = user.ratings
     return render_template("ratings.html", user=user, ratings=ratings_list) 
@@ -74,9 +77,14 @@ def list_movies():
     all_movies = model.session.query(model.Movie).all()
     movie_title = []
     movie_url = []
-    for i in range(len(all_movies)):
-        movie_title.append(all_movies[i].movie_name)
-        movie_url.append(all_movies[i].url)
+
+    for movie in all_movies:
+        movie_title.append(movie.movie_name)
+        movie_url.append(movie.url)
+
+    # for i in range(len(all_movies)):
+    #     movie_title.append(all_movies[i].movie_name)
+    #     movie_url.append(all_movies[i].url)
 
 
     return render_template("all_movies.html", all_movies = all_movies)
@@ -86,6 +94,13 @@ def view_rating(movie_id):
     movie_info = model.session.query(model.Movie).get(movie_id)
     your_rating = None
     avg_score = average_score(movie_info)
+
+
+    # get flask_session[id]
+    # if id:
+    #    for loop:
+    #        ...
+
     for rating in movie_info.ratings:
         if 'id' in flask_session:
             if rating.user_id == flask_session['id']:
@@ -99,6 +114,14 @@ def view_rating(movie_id):
         effective_rating = prediction
     else:
         effective_rating = your_rating.rating
+
+
+    # try:
+    #     the_eye = ...one()
+    # except XXXXXXXX:
+    #    predict_rating
+
+
 
     the_eye = model.session.query(model.User).filter_by(email="theeye@ofjudgement.com").first()
     eye_rating = model.session.query(model.Rating).filter_by(user_id=the_eye.id, movie_id=movie_info.id).first()
@@ -121,42 +144,65 @@ def view_rating(movie_id):
                             movie=movie_info, 
                             rating=your_rating, 
                             avg_score = avg_score, 
-                            prediction=prediction, beratement=beratement)
+                            prediction=prediction, 
+                            beratement=beratement)
 
 def average_score(movie_info):
     avg_score = 0
-    for i in range(len(movie_info.ratings)):
+
+    # get len
+    # loop over items
+
+    for i in range(len(movie_info.ratings)): 
         avg_score += movie_info.ratings[i].rating
     avg_score = float(avg_score)/float(i)
+    
     return avg_score
 
 @app.route("/update/<int:movie_id>", methods=['POST'])
 def update_rating(movie_id):
-    flag = False
     rating = request.form.get('newRating')
     this_user = model.session.query(model.User).get(flask_session['id'])
-    movie = model.session.query(model.Movie).get(movie_id)
+    #movie = model.session.query(model.Movie).get(movie_id)
 
     # Update average score in movie detail page by passing average back to
     # javascript. Needs to be converted to JSON.
     # avg_score = average_score(movie)
 
-    for i in range(len(this_user.ratings)):
-        if this_user.ratings[i].movie_id == movie_id:
-            this_user.ratings[i].rating = rating
-            model.session.add(this_user)
-            model.session.commit()
-            flag = True
-            return str(this_user.ratings[i].rating)            
-
-    if flag == False:
+    rating_object = (model.session.query(model.Rating)
+                                  .filter(and_(model.Rating.movie_id==movie_id, 
+                                               model.Rating.user_id==this_user.id))
+                                  .first())
+    if not rating_object:
         newRating = model.Rating()
         newRating.movie_id = movie_id
         newRating.user_id = this_user.id
         newRating.rating = rating
         model.session.add(newRating)
-        model.session.commit()
-        return str(newRating.rating)
+    else:
+        rating_object.rating = rating
+        model.session.add(rating_object)
+        
+    model.session.commit()
+    return str(rating)
+
+    # for i in range(len(this_user.ratings)):
+    #     if this_user.ratings[i].movie_id == movie_id:
+    #         this_user.ratings[i].rating = rating
+    #         model.session.add(this_user)
+    #         model.session.commit()
+    #         flag = True
+    #         return str(this_user.ratings[i].rating)            
+
+    # if flag == False:
+    #     newRating = model.Rating()
+    #     newRating.movie_id = movie_id
+    #     newRating.user_id = this_user.id
+    #     newRating.rating = rating
+    #     model.session.add(newRating)
+    #     model.session.commit()
+
+        
 
 @app.route("/logout")
 def log_out():
